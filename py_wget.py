@@ -43,11 +43,10 @@ def recursive_download(start_url, output_dir, allowed_domain, wait_time=1):
         parsed_url = urlparse(current_url)
         # 先頭のスラッシュを削除
         local_path = parsed_url.path.lstrip('/')
-        # ファイル名がなければ index.html とする
-        if local_path.endswith('/'):
-            local_path += "index.html"
-        elif not os.path.splitext(local_path)[1]: # 拡張子がない場合
-             local_path += "/index.html"
+        # ファイル名がなければ index.html とする（先頭が空になる場合があるので注意）
+        # os.path.join は空文字列と結合すると正しく 'index.html' を返すためこれを利用する
+        if not local_path or local_path.endswith('/') or not os.path.splitext(local_path)[1]:
+            local_path = os.path.join(local_path, 'index.html')
         
         file_path = os.path.join(output_dir, local_path)
         
@@ -92,19 +91,27 @@ if __name__ == "__main__":
     # --- ここでダウンロードしたいサイトの設定を切り替える ---
     # 【設定1】Google Apps Scriptのドキュメントをダウンロードする場合
 
-    print("--- Google Apps Script ドキュメントのダウンロードを開始します ---")
-    recursive_download(
-        start_url="https://developers.google.com/apps-script/reference/",
-        output_dir="gas_docs_html",
-        allowed_domain="developers.google.com"
-    )
+    # print("--- Google Apps Script ドキュメントのダウンロードを開始します ---")
+    # recursive_download(
+    #     start_url="https://developers.google.com/apps-script/reference/",
+    #     output_dir="gas_docs_html",
+    #     allowed_domain="developers.google.com"
+    # )
 
-    print("\n" + "="*50 + "\n")
+    # print("\n" + "="*50 + "\n")
 
-    # 【設定2】Gemini APIのドキュメントをダウンロードする場合
-    print("--- Gemini API ドキュメントのダウンロードを開始します ---")
+    # # 【設定2】Gemini APIのドキュメントをダウンロードする場合
+    # print("--- Gemini API ドキュメントのダウンロードを開始します ---")
+    # recursive_download(
+    #     start_url="https://ai.google.dev/gemini-api/docs/",
+    #     output_dir="gemini_api_docs_html",
+    #     allowed_domain="ai.google.dev"
+    # )
+    
+    # 【設定3】GitLab CIのドキュメントをダウンロードする場合
+    print("--- GitLab CI ドキュメントのダウンロードを開始します ---")
     recursive_download(
-        start_url="https://ai.google.dev/gemini-api/docs/",
-        output_dir="gemini_api_docs_html",
-        allowed_domain="ai.google.dev"
+        start_url="https://docs.gitlab.com/ci/",
+        output_dir="gitlab_docs_html",
+        allowed_domain="docs.gitlab.com"
     )

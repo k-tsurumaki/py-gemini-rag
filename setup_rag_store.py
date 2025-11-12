@@ -20,7 +20,7 @@ doc_directorys = ["gas_docs_txt","gemini_api_docs_txt"]
 # --- 1. ファイル検索ストアの作成 ---
 print("ファイル検索ストアを作成しています...")
 file_search_store = client.file_search_stores.create(
-    config={'display_name': 'GAS Documentation RAG Store (new SDK)'}
+    config={'display_name': 'GitLab CI Documentation RAG Store (new SDK)'}
 )
 
 # --- 2. ディレクトリ内の全テキストファイルをアップロード ---

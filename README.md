@@ -1,4 +1,4 @@
-# Gemini RAG AIアシスタント for GAS & Gemini API
+# Gemini RAG AIアシスタント for GitLab CI
 
 これは、Google Apps Script (GAS) と Gemini API の公式ドキュメントを知識源とする、対話型のAI開発アシスタントです。
 Gemini File Search API を活用したRAG（Retrieval-Augmented Generation）システムを構築し、特定の技術分野に関する正確で信頼性の高いコード生成や質問応答を実現します。

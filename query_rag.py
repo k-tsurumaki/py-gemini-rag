@@ -17,13 +17,13 @@ FILE_SEARCH_STORE_NAME = "fileSearchStores/gas-documentation-rag-store-eh3fonwv9
 # ▼▼▼【ここからが新しい関数】▼▼▼
 def is_question_about_gas(question: str) -> bool:
     """
-    質問がGoogle Apps Scriptに関連しているかどうかを判定する関数
+    質問がGitLab CIに関連しているかどうかを判定する関数
     """
     print("  - 質問内容を判定中...")
     try:
         # 判定用のシンプルなプロンプト
         prompt = f"""
-        以下のユーザーからの質問は、プログラミング言語の「Google Apps Script (GAS)または、Gemini-api」に関連する内容ですか？
+        以下のユーザーからの質問は、プログラミング言語の「GitLab CI」に関連する内容ですか？
         関連している場合は "Yes"、関連していない場合は "No" とだけ答えてください。
 
         質問: "{question}"
@@ -47,7 +47,7 @@ def is_question_about_gas(question: str) -> bool:
 if FILE_SEARCH_STORE_NAME == "ここにストア名を貼り付け":
     print("エラー: `FILE_SEARCH_STORE_NAME`に変数を設定してください。")
 else:
-    question = input("GASまたはgemini-apiに関する質問を入力してください。＝＞ # ")
+    question = input("GitLab CIに関する質問を入力してください。＝＞ # ")
 
     instractions="""
 # 指示
@@ -98,7 +98,7 @@ else:
         else:
             # 質問がGASに関係ない場合は、定型文を返す
             print("\n--- 回答 ---")
-            print("申し訳ありませんが、私はGoogle Apps Scriptに関する質問にのみお答えできます。")
+            print("申し訳ありませんが、私はGitLab CIに関する質問にのみお答えできます。")
         # ▲▲▲【ここまでが新しいロジック】▲▲▲
             
         question = input("\n次の質問をどうぞ (終了するには Enter のみ): ")
