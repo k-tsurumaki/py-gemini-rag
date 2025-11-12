@@ -14,7 +14,7 @@ if not api_key:
 
 # --- Clientオブジェクトを作成 ---
 client = genai.Client(api_key=api_key) 
-doc_directorys = ["gas_docs_txt","gemini_api_docs_txt"]
+doc_directorys = ["gitlab_docs_txt"]
 #doc_directorys = ["gas","gemini"]
 
 # --- 1. ファイル検索ストアの作成 ---

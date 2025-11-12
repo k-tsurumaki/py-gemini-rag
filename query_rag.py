@@ -1,18 +1,21 @@
 # query_rag.py (事前判定機能付き)
 import os
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from dotenv import load_dotenv
 
 # --- .envファイルから環境変数を読み込む ---
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
     raise ValueError("APIキーが.envファイルに設定されていません。")
-client = genai.Client(api_key=api_key) 
+client = genai.Client(api_key=api_key)
 
-# --- ストア名を設定 ---
-FILE_SEARCH_STORE_NAME = "fileSearchStores/gas-documentation-rag-store-eh3fonwv95f9" # あなたのストア名に設定済み
+# .env から STORE_NAME_FILE のパスを取得（指定がなければデフォルトのファイル名を使う）
+STORE_NAME_FILE = os.getenv("STORE_NAME_FILE", "")
+FILE_SEARCH_STORE_NAME = STORE_NAME_FILE
+
 
 # ▼▼▼【ここからが新しい関数】▼▼▼
 def is_question_about_gas(question: str) -> bool:
@@ -28,28 +31,32 @@ def is_question_about_gas(question: str) -> bool:
 
         質問: "{question}"
         """
-        
+
         # 高速なモデルで判定
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt,
-            config=types.GenerateContentConfig(temperature=0) # 創造性はいらないので温度を0に
+            config=types.GenerateContentConfig(
+                temperature=0
+            ),  # 創造性はいらないので温度を0に
         )
-        
+
         # 回答が"Yes"を含んでいるかどうかで判定
         print(f"  - 判定結果: {response.text.strip()}")
         return "yes" in response.text.lower()
     except Exception as e:
         print(f"  - 判定中にエラーが発生しました: {e}")
-        return False # エラー時は安全側に倒し、処理を続行しない
+        return False  # エラー時は安全側に倒し、処理を続行しない
+
+
 # ▲▲▲【ここまでが新しい関数】▲▲▲
 
-if FILE_SEARCH_STORE_NAME == "ここにストア名を貼り付け":
+if FILE_SEARCH_STORE_NAME == "":
     print("エラー: `FILE_SEARCH_STORE_NAME`に変数を設定してください。")
 else:
     question = input("GitLab CIに関する質問を入力してください。＝＞ # ")
 
-    instractions="""
+    instractions = """
 # 指示
 考えるのは英語で考えること
 出力は日本語で出力すること  
@@ -72,12 +79,12 @@ else:
                             )
                         )
                     ]
-                )
+                ),
             )
             print("\n--- 回答 ---")
             print(response.text)
-            #print("\n--- 引用元情報 ---")
-            #print(response.candidates[0].grounding_metadata)
+            # print("\n--- 引用元情報 ---")
+            # print(response.candidates[0].grounding_metadata)
             ###
             # grounding_metadataオブジェクトを取得
             metadata = response.candidates[0].grounding_metadata
@@ -86,13 +93,15 @@ else:
                 for i, chunk in enumerate(metadata.grounding_chunks):
                     source_file = chunk.retrieved_context.title
                     retrieved_text = chunk.retrieved_context.text
-                    print(f"\n【引用 {i+1}】")
+                    print(f"\n【引用 {i + 1}】")
                     print(f"  ファイル名: {source_file}")
                     print(f"  内容の冒頭: {retrieved_text[:100]}...")
             else:
                 # 引用元が見つからなかった場合（RAGが機能しなかった場合）
                 print("\n--- 引用元情報 ---")
-                print("  (この回答はアップロードされたドキュメントからは引用されていません)")
+                print(
+                    "  (この回答はアップロードされたドキュメントからは引用されていません)"
+                )
 
             ###
         else:
@@ -100,7 +109,7 @@ else:
             print("\n--- 回答 ---")
             print("申し訳ありませんが、私はGitLab CIに関する質問にのみお答えできます。")
         # ▲▲▲【ここまでが新しいロジック】▲▲▲
-            
+
         question = input("\n次の質問をどうぞ (終了するには Enter のみ): ")
 
 print("プログラムを終了します。")

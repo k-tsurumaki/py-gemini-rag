@@ -4,3 +4,5 @@
 # その他、Pythonのキャッシュファイルなど
 __pycache__/
 *.pyc
+
+setup_rag_store_file_search_store_name.txt

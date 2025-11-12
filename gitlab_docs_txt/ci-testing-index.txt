@@ -1,0 +1,53 @@
+Source Path: gitlab_docs_html/ci/testing/index.html
+
+Test with GitLab CI/CD
+Tier
+: Free, Premium, Ultimate
+Offering
+: GitLab.com, GitLab Self-Managed, GitLab Dedicated
+Use GitLab CI/CD to test changes in feature branches. You can display test reports and
+link to important information directly in
+merge requests
+.
+Testing and quality reports
+You can generate the following reports:
+Feature
+Description
+Accessibility testing
+Detect accessibility violations for changed pages.
+Browser performance testing
+Measure browser performance impact of code changes.
+Code coverage
+View test coverage results, line-by-line coverage in diffs, and overall metrics.
+Code quality
+Analyze source code quality with Code Climate.
+Display arbitrary job artifacts
+Link to selected job artifacts using
+artifacts:expose_as
+.
+Fail fast testing
+Stop pipelines early when RSpec tests fail.
+License scanning
+Scan and manage dependency licenses.
+Load performance testing
+Measure server performance impact of code changes.
+Metrics reports
+Track custom metrics like memory usage and performance.
+Unit test reports
+View test results and identify failures without checking job logs.
+Security reports
+Tier
+: Ultimate
+You can generate
+security reports
+by scanning your project for vulnerabilities:
+Feature
+Description
+Container scanning
+Scan Docker images for vulnerabilities.
+Dynamic application security testing (DAST)
+Scan running web applications for vulnerabilities.
+Dependency scanning
+Scan dependencies for vulnerabilities.
+Static application security testing (SAST)
+Scan source code for vulnerabilities.

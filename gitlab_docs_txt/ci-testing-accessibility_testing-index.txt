@@ -1,0 +1,78 @@
+Source Path: gitlab_docs_html/ci/testing/accessibility_testing/index.html
+
+Accessibility testing
+Tier
+: Free, Premium, Ultimate
+Offering
+: GitLab.com, GitLab Self-Managed, GitLab Dedicated
+If your application offers a web interface, you can use
+GitLab CI/CD
+to determine the accessibility
+impact of pending code changes.
+Pa11y
+is a free and open source tool for
+measuring the accessibility of web sites. GitLab integrates Pa11y into a
+CI/CD job template
+.
+The
+a11y
+job analyzes a defined set of web pages and reports
+accessibility violations, warnings, and notices in a file named
+accessibility
+.
+Pa11y uses
+WCAG 2.1 rules
+.
+Accessibility merge request widget
+GitLab displays an
+Accessibility Report
+in the merge request widget area:
+Configure accessibility testing
+You can run Pa11y with GitLab CI/CD using the
+GitLab Accessibility Docker image
+.
+To define the
+a11y
+job:
+Include
+the
+Accessibility.gitlab-ci.yml
+template
+from your GitLab installation.
+Add the following configuration to your
+.gitlab-ci.yml
+file.
+stages
+:
+-
+accessibility
+variables
+:
+a11y_urls
+:
+"https://about.gitlab.com https://gitlab.com/users/sign_in"
+include
+:
+-
+template
+:
+"Verify/Accessibility.gitlab-ci.yml"
+Customize the
+a11y_urls
+variable to list the URLs of the web pages to test with Pa11y.
+The
+a11y
+job in your CI/CD pipeline generates these files:
+One HTML report per URL listed in the
+a11y_urls
+variable.
+One file containing the collected report data. This
+file is named
+gl-accessibility.json
+.
+You can
+view job artifacts in your browser
+.
+The job definition provided by the template does not support Kubernetes.
+You cannot pass configurations into Pa11y via CI configuration.
+To change the configuration, edit a copy of the template in your CI file.

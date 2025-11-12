@@ -1,0 +1,210 @@
+Source Path: gitlab_docs_html/ci/runners/git_submodules/index.html
+
+Using Git submodules with GitLab CI/CD
+Tier
+: Free, Premium, Ultimate
+Offering
+: GitLab.com, GitLab Self-Managed, GitLab Dedicated
+Use
+Git submodules
+to keep
+a Git repository as a subdirectory of another Git repository. You can clone another
+repository into your project and keep your commits separate.
+Configure the
+.gitmodules
+file
+When you use Git submodules, your project should have a file named
+.gitmodules
+.
+You have multiple options to configure it to work in a GitLab CI/CD job.
+Using absolute URLs
+History
+Introduced
+in GitLab Runner 15.11.
+For example, your generated
+.gitmodules
+configuration might look like the following if:
+Your project is located at
+https://gitlab.com/secret-group/my-project
+.
+Your project depends on
+https://gitlab.com/group/project
+, which you want
+to include as a submodule.
+You check out your sources with an SSH address like
+git@gitlab.com:secret-group/my-project.git
+.
+[submodule "project"]
+path
+=
+project
+url = git@gitlab.com:group/project.git
+In this case, use the
+GIT_SUBMODULE_FORCE_HTTPS
+variable
+to instruct GitLab Runner to convert the URL to HTTPS before it clones the submodules.
+Alternatively, if you also use HTTPS locally, you can configure an HTTPS URL:
+[submodule "project"]
+path
+=
+project
+url = https://gitlab.com/group/project.git
+You do not need to configure additional variables in this case, but you need to use a
+personal access token
+to clone it locally.
+Using relative URLs
+If you use relative URLs, submodules may resolve incorrectly in forking workflows.
+Use absolute URLs instead if you expect your project to have forks.
+When your submodule is on the same GitLab server, you can also use relative URLs in
+your
+.gitmodules
+file:
+[submodule "project"]
+path
+=
+project
+url = ../../project.git
+The previous configuration instructs Git to automatically deduce the URL to
+use when cloning sources. You can clone with HTTPS in all your CI/CD jobs, and you
+can continue to use SSH to clone locally.
+For submodules not located on the same GitLab server, always use the full URL:
+[submodule "project-x"]
+path
+=
+project-x
+url = https://gitserver.com/group/project-x.git
+Use Git submodules in CI/CD jobs
+Prerequisites:
+If you use the
+CI_JOB_TOKEN
+to clone a submodule in a
+pipeline job, you must have at least the Reporter role for the submodule repository to pull the code.
+CI/CD job token access
+must be properly configured in the upstream submodule project.
+To make submodules work correctly in CI/CD jobs:
+You can set the
+GIT_SUBMODULE_STRATEGY
+variable to either
+normal
+or
+recursive
+to tell the runner to
+fetch your submodules before the job
+:
+variables
+:
+GIT_SUBMODULE_STRATEGY
+:
+recursive
+For submodules located on the same GitLab server and configured with a Git or SSH URL, make sure
+you set the
+GIT_SUBMODULE_FORCE_HTTPS
+variable.
+Use
+GIT_SUBMODULE_DEPTH
+to configure the cloning depth of submodules independently of the
+GIT_DEPTH
+variable:
+variables
+:
+GIT_SUBMODULE_DEPTH
+:
+1
+You can filter or exclude specific submodules to control which submodules are synchronized using
+GIT_SUBMODULE_PATHS
+.
+variables
+:
+GIT_SUBMODULE_PATHS
+:
+submoduleA submoduleB
+You can provide additional flags to control advanced checkout behavior using
+GIT_SUBMODULE_UPDATE_FLAGS
+.
+variables
+:
+GIT_SUBMODULE_STRATEGY
+:
+recursive
+GIT_SUBMODULE_UPDATE_FLAGS
+:
+--
+jobs 4
+Troubleshooting
+Can’t find the
+.gitmodules
+file
+The
+.gitmodules
+file might be hard to find because it is usually a hidden file.
+You can check documentation for your specific OS to learn how to find and display
+hidden files.
+If there is no
+.gitmodules
+file, it’s possible the submodule settings are in a
+git config
+file.
+Error:
+fatal: run_command returned non-zero status
+This error can happen in a job when working with submodules and the
+GIT_STRATEGY
+is set to
+fetch
+.
+Setting the
+GIT_STRATEGY
+to
+clone
+should resolve the issue.
+Error:
+fatal: could not read Username for 'https://gitlab.com': No such device or address
+If you’re using GitLab hosted runners, you may encounter this error when your CI/CD job attempts to clone or fetch Git submodules.
+During CI/CD pipeline execution, GitLab Runners automatically perform Git URL substitution to authenticate
+through
+CI_JOB_TOKEN
+:
+git config --global url.
+"https://gitlab-ci-token:
+${
+CI_JOB_TOKEN
+}
+@
+${
+CI_SERVER_FQDN
+}
+"
+.insteadOf
+"
+${
+CI_SERVER_FQDN
+}
+"
+For GitLab hosted runners, the
+CI_SERVER_FQDN
+is different from
+https://gitlab.com
+.
+If your submodule resides in
+https://gitlab.com
+,
+this substitution is not performed, leading to the error.
+One way to resolve this error is to create a
+pre_get_sources_script
+and
+configure the URL substitution with
+CI_JOB_TOKEN
+manually:
+variables
+:
+GIT_SUBMODULE_STRATEGY
+:
+recursive
+GIT_SUBMODULE_DEPTH
+:
+1
+hooks
+:
+pre_get_sources_script
+:
+-
+git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_FQDN}".insteadOf "${SUBMODULE_URL}"

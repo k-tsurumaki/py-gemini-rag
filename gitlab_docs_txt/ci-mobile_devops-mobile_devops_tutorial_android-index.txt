@@ -1,0 +1,296 @@
+Source Path: gitlab_docs_html/ci/mobile_devops/mobile_devops_tutorial_android/index.html
+
+Tutorial: Build Android apps with GitLab Mobile DevOps
+In this tutorial, you’ll create a pipeline by using GitLab CI/CD that builds your Android mobile app,
+signs it with your credentials, and distributes it to app stores.
+To set up mobile DevOps:
+Set up your build environment
+Configure code signing with fastlane and Gradle
+Set up Android apps distribution with Google Play integration and fastlane
+Before you begin
+Before you start this tutorial, make sure you have:
+A GitLab account with access to CI/CD pipelines
+Your mobile app code in a GitLab repository
+A Google Play developer account
+fastlane
+installed locally
+Set up your build environment
+Use
+GitLab-hosted runners
+,
+or set up
+self-managed runners
+for complete control over the build environment.
+Android builds use Docker images, offering multiple Android API versions.
+Create a
+.gitlab-ci.yml
+file in your repository root.
+Add a Docker image from
+Fabernovel
+:
+test
+:
+image
+:
+fabernovel/android:api-33-v1.7.0
+stage
+:
+test
+script
+:
+-
+fastlane test
+Configure code signing with fastlane and Gradle
+To set up code signing for Android:
+Create a keystore:
+Run the following command to generate a keystore file:
+keytool -genkey -v -keystore release-keystore.jks -storepass password -alias release -keypass password
+\
+-keyalg RSA -keysize
+2048
+-validity
+10000
+Put the keystore configuration in the
+release-keystore.properties
+file:
+storeFile=.secure_files/release-keystore.jks
+keyAlias=release
+keyPassword=password
+storePassword=password
+Upload both files as
+Secure Files
+in your project settings.
+Add both files to your
+.gitignore
+file so they aren’t committed to version control.
+Configure Gradle to use the newly created keystore. In the app’s
+build.gradle
+file:
+Immediately after the plugins section, add:
+def
+keystoreProperties
+=
+new
+Properties
+()
+def
+keystorePropertiesFile
+=
+rootProject
+.
+file
+(
+'.secure_files/release-keystore.properties'
+)
+if
+(
+keystorePropertiesFile
+.
+exists
+())
+{
+keystoreProperties
+.
+load
+(
+new
+FileInputStream
+(
+keystorePropertiesFile
+))
+}
+Anywhere in the
+android
+block, add:
+signingConfigs
+{
+release
+{
+keyAlias
+keystoreProperties
+[
+'keyAlias'
+]
+keyPassword
+keystoreProperties
+[
+'keyPassword'
+]
+storeFile
+keystoreProperties
+[
+'storeFile'
+]
+?
+file
+(
+keystoreProperties
+[
+'storeFile'
+])
+:
+null
+storePassword
+keystoreProperties
+[
+'storePassword'
+]
+}
+}
+Add the
+signingConfig
+to the release build type:
+signingConfig
+signingConfigs
+.
+release
+The following are sample
+fastlane/Fastfile
+and
+.gitlab-ci.yml
+files with this configuration:
+fastlane/Fastfile
+:
+default_platform
+(
+:android
+)
+platform
+:android
+do
+desc
+"Create and sign a new build"
+lane
+:build
+do
+gradle
+(
+tasks
+:
+[
+"clean"
+,
+"assembleRelease"
+,
+"bundleRelease"
+]
+)
+end
+end
+.gitlab-ci.yml
+:
+build
+:
+image
+:
+fabernovel/android:api-33-v1.7.0
+stage
+:
+build
+script
+:
+-
+apt update -y && apt install -y curl
+-
+wget https://gitlab.com/gitlab-org/cli/-/releases/v1.74.0/downloads/glab_1.74.0_linux_amd64.deb
+-
+apt install ./glab_1.74.0_linux_amd64.deb
+-
+glab auth login --hostname $CI_SERVER_FQDN --job-token $CI_JOB_TOKEN
+-
+glab securefile download --all --output-dir .secure_files/
+-
+fastlane build
+Set up Android apps distribution with Google Play integration and fastlane
+Signed builds can be uploaded to the Google Play Store by using the Mobile DevOps Distribution integrations.
+Create a Google service account
+in Google Cloud Platform and grant that account access to the project in Google Play.
+Enable the Google Play integration:
+On the left sidebar, select
+Search or go to
+and find your project. If you’ve
+turned on the new navigation
+, this field is on the top bar.
+Select
+Settings
+>
+Integrations
+.
+Select
+Google Play
+.
+Under
+Enable integration
+, select the
+Active
+checkbox.
+In
+Package name
+, enter the package name of the app. For example,
+com.gitlab.app_name
+.
+In
+Service account key (.JSON)
+drag or upload your key file.
+Select
+Save changes
+.
+Add the release step to your pipeline.
+The following is a sample
+fastlane/Fastfile
+:
+default_platform
+(
+:android
+)
+platform
+:android
+do
+desc
+"Submit a new Beta build to the Google Play store"
+lane
+:beta
+do
+upload_to_play_store
+(
+track
+:
+'internal'
+,
+aab
+:
+'app/build/outputs/bundle/release/app-release.aab'
+,
+release_status
+:
+'draft'
+)
+end
+end
+The following is a sample
+.gitlab-ci.yml
+:
+beta
+:
+image
+:
+fabernovel/android:api-33-v1.7.0
+stage
+:
+beta
+script
+:
+-
+fastlane beta
+For an overview, see
+Google Play integration demo
+.
+Congratulations! Your app is now set up for automated building, signing, and distribution. Try creating
+a merge request to trigger your first pipeline.
+Related topics
+See the Mobile DevOps
+Android Demo
+project for a complete build, sign, and release pipeline example for Android.
+For additional reference materials, see the
+DevOps section
+of the GitLab blog.
